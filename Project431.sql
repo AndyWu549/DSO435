@@ -59,7 +59,7 @@ Gender_ID number(4) Constraint Gender_NN not null
 Create Table Contact(
 Person_Id number(6) Primary Key Constraint Person_Contact_FK references People,
 Relation Varchar2(15) not null,
-Phone_num Varchar(10) not null);
+Phone_num Varchar(20) not null);
 
 Create Table Dependent(
 Person_ID number(6) Primary Key Constraint Person_Dependent_FK references People,
@@ -72,7 +72,7 @@ DOB date);
 
 Create Table District(
 District_ID number(10) Primary Key,
-District_Name varchar2(20) not null);
+District_Name varchar2(40) not null);
 
 Create Table School (
 School_ID number(10) Primary Key,
@@ -107,12 +107,13 @@ Shelter Varchar2(15) not null);
 Create Table Applicant(
 Person_ID number(6) Primary Key Constraint Person_Applicant_FK references People,
 Phone_Type varchar2(10),
-Phone_Num Varchar2(10),
+Phone_Num Varchar2(20),
 Email Varchar2(30),
 DOB date,
 Bank_Account Varchar2(1),
 Pic_ID Varchar2(1),
-Pet_Number number(3),
+Pet_Number number(3)
+SNN number(9),
 BracketID number(5) constraint Bracket_NN Not null constraint Bracket_FK references Income_Amount,
 Religion_ID number(10) constraint Religion_FK references Religion,
 Area_ID number(10) constraint Applicant_Area_NN not null constraint Area_FK references Sleeping_Area,
@@ -246,3 +247,56 @@ CREATE INDEX Intake_Spouse_FK On Intake_Form(Spouse_Person_ID);
 CREATE INDEX Intake_Applicant_FK ON Intake_Form(Applicant_person_ID);
 CREATE INDEX preIntake_date On PreIntake(preIntake_Date);
 /* insert data + sql query */
+
+Alter session set NLS_Date_format = 'mm-dd-yyyy';
+
+Insert into pet_size values(1, 'L');
+Insert into pet_size values(2,'M');
+Insert into pet_size values(3,'S');
+
+Insert into Species values(1, 'Canis Lupus Familiaris');
+Insert into Species values(2,'Felis');
+
+Insert into Pet_Breed values(1,'Golden Retriver',1);
+Insert into Pet_Breed values(2,'Siamese cat', 2);
+Insert into Pet_Breed values(3,'Chartreux',2);
+
+Insert into Gender values(1,'Male');
+Insert into Gender Values (2, 'Female');
+
+Insert into People values( 1,'Andy',Null,'Wu','Y','N','N','N',1);
+Insert into people values( 2,'Lily',Null,'Ta','Y','N','N','N',2);
+Insert into people values(3,'Ryanna',Null,'Lui','Y','N','N','N',2);
+Insert into people values(4, 'Boa',Null,'Hancock','N','Y','N','N',2);
+Insert into people values(5, 'Portgas','D','Ace', 'N','N','N','Y',1);
+Insert into people values(6, 'Eustass',Null,'Kid','N','N','Y','N',1);
+
+Insert into Contact values(5,'Brother','(152)-632-1792');
+
+Insert into Dependent values (6,'01-10-2010' ,'Y');
+
+Insert into Spouse values (4, '09-02-1998');
+
+Insert into District values(1, 'San Bernardino City Unified School District');
+
+Insert into School Values (1, 'San Bernardino Elementry School');
+Insert into school Values (2, 'San Bernardino High School');
+
+/*Insert into location*/
+
+Insert into Income_Amount values (1,'0-500');
+Insert into Income_Amount values (2,'501-1500');
+Insert into Income_Amount values(3, '1001-2000');
+
+Insert into Religion values (1,'Christianity');
+Insert into Religion values (2,'Buddhism');
+
+Insert into Sleeping_Area(1, 'Park');
+Insert into Sleeping_Area(2,'Public Restroom');
+Insert into Sleeping_Area(3, 'Street');
+
+Insert into Sleeping_Area_other(1, 'Friends House');
+
+Insert into Living_status(1, 'Park bench');
+Insert into Living_status(2,'Bridge');
+
