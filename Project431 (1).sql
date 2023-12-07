@@ -25,6 +25,8 @@ Drop Table Intake_Form CASCADE CONSTRAINTS;
 Drop Table Dependent_Intake CASCADE CONSTRAINTS;
 drop table Contact_Intake CASCADE CONSTRAINTS;
 drop Table preIntake CASCADE CONSTRAINTS;
+drop table referral CASCADE CONSTRAINTS;
+drop table referral_applicant CASCADE CONSTRAINTS;
 
 create table pet_size(
 Pet_Size_id number(1) PRIMARY KEY,
@@ -59,7 +61,7 @@ Gender_ID number(4) Constraint Gender_NN not null
 Create Table Contact(
 Person_Id number(6) Primary Key Constraint Person_Contact_FK references People,
 Relation Varchar2(15) not null,
-Phone_num Varchar(10) not null);
+Phone_num Varchar(20) not null);
 
 Create Table Dependent(
 Person_ID number(6) Primary Key Constraint Person_Dependent_FK references People,
@@ -72,11 +74,11 @@ DOB date);
 
 Create Table District(
 District_ID number(10) Primary Key,
-District_Name varchar2(20) not null);
+District_Name varchar2(100) not null);
 
 Create Table School (
 School_ID number(10) Primary Key,
-School_name Varchar2(30) not null,
+School_name Varchar2(100) not null,
 District_ID number(10) constraint School_NN not null
                        constraint School_FK references District);
 
@@ -104,18 +106,23 @@ Create Table Living_Status(
 Living_Status_ID number(5) Primary Key,
 Shelter Varchar2(15) not null);
 
+Create Table Income_Source(
+Income_ID number(10) Primary Key,
+Income_Desc Varchar2(25) not null);
+
 Create Table Applicant(
 Person_ID number(6) Primary Key Constraint Person_Applicant_FK references People,
-Phone_Type varchar2(10),
-Phone_Num Varchar2(10),
-Email Varchar2(30),
-DOB date,
-Bank_Account Varchar2(1),
-Pic_ID Varchar2(1),
-Pet_Number number(3),
+Phone_Type varchar2(100) not null,
+Phone_Num Varchar2(100) not null,
+Email Varchar2(100),
+DOB date not null,
+Bank_Account Varchar2(1) not null,
+Pic_ID Varchar2(1) not null,
+SNN number(9),
+Income_ID number(10) constraint Applicant_Income_Fk references Income_Source,
 BracketID number(5) constraint Bracket_NN Not null constraint Bracket_FK references Income_Amount,
 Religion_ID number(10) constraint Religion_FK references Religion,
-Area_ID number(10) constraint Applicant_Area_NN not null constraint Area_FK references Sleeping_Area,
+Area_ID number(10) constraint Area_FK references Sleeping_Area,
 Area_Other_ID number(10) constraint Area_Other_FK references sleeping_area_other,
 Living_Status_ID number(5) constraint Living_Applicant_FK references Living_Status);
 
@@ -126,9 +133,6 @@ Person_ID number(6) constraint Pets_Applicant_FK references Applicant,
 Pet_Size_ID number(1) constraint Pets_Size_FK references Pet_Size,
 Breed_ID number(4) constraint Pet_Breed_FK references Pet_Breed);
 
-Create Table Income_Source(
-Income_ID number(10) Primary Key,
-Income_Desc Varchar2(25) not null);
 
 Create Table Applicant_Income_Relation(
 Person_ID number(6) constraint Person_Income_FK references Applicant,
@@ -154,7 +158,6 @@ Create Table Intake_Form(
 Form_id number(15) Primary Key,
 Datetime Date not null,
 Homeless_Start_Date Date not null,
-Homeless_Duration varchar2(25) not null,
 Lit_Homeless_Y_N varchar2(1) not null,
 Relocate_Y_N varchar2(1) not null,
 Vehicle_Y_N varchar2(1) not null,
@@ -186,9 +189,21 @@ Form_ID number(15) constraint Contact_Intake_Form_FK references Intake_Form,
 constraint Contact_Intake_PK primary key(Person_ID, Form_id));
 
 Create Table PreIntake(
-Person_ID number(6) Constraint PreIntake_Person_FK references Applicant,
-Location_ID number(10) constraint PreIntake_Location_FK references Location,
+PreIntake number(6) primary key,
+Person_ID number(6) Constraint PreIntake_person_NN not null Constraint PreIntake_Person_FK references Applicant,
+Location_ID number(10) Constraint PreIntake_Location_NN not null constraint PreIntake_Location_FK references Location,
 preIntake_Date Date not null);
+
+Create Table Referral (
+Referral_num number(5) primary key,
+First_Name varchar2(30) not null,
+Middle_Name varchar2(30),
+Last_Name varchar2(30) not null);
+
+Create table Referral_Applicant(
+Person_ID number(6) constraint Referral_Applicant_Fk references Applicant,
+Referral_num number(5) constraint Referral_Referral_Fk references Referral,
+constraint Referral_Applicant_Pk primary key( Person_ID, Referral_num));
 
 CREATE INDEX Contact_Intake_C_FK ON Contact_Intake (Person_ID);
 CREATE INDEX Contact_Intake_Form_FK ON Contact_Intake(Form_ID);
@@ -217,7 +232,6 @@ CREATE INDEX Applicant_Email ON Applicant(Email);
 CREATE INDEX Applicant_DOB ON Applicant(DOB);
 CREATE INDEX Applicant_Bank_Account ON Applicant(Bank_Account);
 CREATE INDEX Applicant_Pic_ID ON Applicant(Pic_ID);
-CREATE INDEX Applicant_Pet_Number ON Applicant(Pet_Number);
 CREATE INDEX Applicant_BrackID_FK ON Applicant(BracketID);
 CREATE INDEX Applicant_Religion_ID_FK ON Applicant(Religion_ID);
 CREATE INDEX Applicant_Area_ID_FK ON Applicant(Area_ID);
@@ -245,4 +259,123 @@ CREATE INDEX Intake_School_FK ON Intake_Form(School_ID);
 CREATE INDEX Intake_Spouse_FK On Intake_Form(Spouse_Person_ID);
 CREATE INDEX Intake_Applicant_FK ON Intake_Form(Applicant_person_ID);
 CREATE INDEX preIntake_date On PreIntake(preIntake_Date);
+CREATE INDEX Referal_R ON Referral_Applicant(Person_ID);
+CREATE INDEX Referal_Person ON Referral_Applicant(Referral_Num);
 /* insert data + sql query */
+
+Alter session set NLS_Date_format = 'mm-dd-yyyy';
+
+Insert into pet_size values(1, 'L');
+Insert into pet_size values(2,'M');
+Insert into pet_size values(3,'S');
+
+Insert into Species values(1, 'Canis Lupus Familiaris');
+Insert into Species values(2,'Felis');
+
+Insert into Pet_Breed values(1,'Golden Retriver',1);
+Insert into Pet_Breed values(2,'Siamese cat', 2);
+Insert into Pet_Breed values(3,'Chartreux',2);
+
+Insert into Gender values(1,'Male');
+Insert into Gender Values (2, 'Female');
+
+Insert into People values( 1,'Andy',Null,'Wu','Y','N','N','N',1);
+Insert into people values( 2,'Lily',Null,'Ta','Y','N','N','N',2);
+Insert into people values(3,'Ryanna',Null,'Lui','Y','N','N','N',2);
+Insert into people values(4, 'Boa',Null,'Hancock','N','Y','N','N',2);
+Insert into people values(5, 'Portgas','D','Ace', 'N','N','N','Y',1);
+Insert into people values(6, 'Eustass',Null,'Kid','N','N','Y','N',1);
+
+Insert into Contact values(5,'Brother','(152)-632-1792');
+
+Insert into Dependent values (6,'01-10-2010' ,'Y');
+
+Insert into Spouse values (4, '09-02-1998');
+
+Insert into District values(1, 'San Bernardino City Unified School District');
+Insert into District Values(2,'Private School');
+
+Insert into School Values (1, 'San Bernardino Elementry School',1);
+Insert into school Values (2, 'San Bernardino High School',1);
+Insert into school Values (3, 'University of Southern California',2);
+
+Insert into location values(1, 'Los Angeles');
+Insert into location values(2, 'San Berardino');
+Insert into location values(3,'Riverside');
+
+Insert into Income_Amount values (1,'0-500');
+Insert into Income_Amount values (2,'501-1500');
+Insert into Income_Amount values(3, '1001-2000');
+
+Insert into Religion values (1,'Christianity');
+Insert into Religion values (2,'Buddhism');
+
+Insert into Sleeping_Area values(1, 'Park');
+Insert into Sleeping_Area values(2,'Public Restroom');
+Insert into Sleeping_Area values(3, 'Street');
+
+Insert into Sleeping_Area_other values(1, 'Friends House');
+
+Insert into Living_status values(1, 'Park bench');
+Insert into Living_status values(2,'Bridge');
+
+Insert into Applicant values(1,'Mobile','(321)331-4491','changhao@usc.edu','11-05-2000','Y','Y',null,2,1,null,1,null,1);
+Insert into Applicant values(2,'Mobile','(213)740-2311','LilyTa007@Gamil.com','10-21-2001','N','Y',333444222,1,2,1,2,null,2);
+Insert into Applicant values(3,'Land Line','(213)841-3422','RyannaLui444@gmail.com','06-22-2002','Y','N',null,3,1,2,null,1,2);
+
+Insert into Pets values(1,'Oreo',1,3,3);
+Insert into Pets values(2,'Cookie',1,3,3);
+Insert into Pets values(3,'Milkshake',2,1,1);
+Insert into Pets values(4,'Snow',3,2,2);
+
+Insert into Income_source values(1, 'Selling Candy');
+Insert into Income_source values(2, 'Ice Cream Vendor');
+Insert into Income_source values(3, 'Babysitter');
+
+Insert into Applicant_income_relation values(1,2);
+Insert into Applicant_income_relation values(2,1);
+Insert into Applicant_income_relation values(3,3);
+
+Insert into Gov_assistance values(1,'Food Stamp');
+Insert into Gov_assistance values(2,'Healthcare');
+Insert into Gov_assistance values(3,'Subsidies');
+
+Insert into Applicant_gov_Relation values(1,1);
+Insert into Applicant_gov_relation values(1,2);
+Insert into Applicant_gov_relation values(2,3);
+Insert into Applicant_gov_relation values(2,2);
+Insert into Applicant_gov_relation values(3,1);
+
+Insert into Coalition_member values(1,'Kathy',Null,'Kim');
+Insert into Coalition_member values(2,'Nico',Null,'Robin');
+
+Insert into Intake_form values(1, '12-06-2023', '08-22-2023','Y','Y','Y','N','Unemployeement','No Job','Y','2022','Y','Y','N','N','Y','N',1,2,1,4,1);
+Insert into Intake_form Values(2, '10-15-2023','09-03-2023','Y','N','N','Y','Disability','Can not find a job','N','2023','N','Y','N','N','N','N',2,1,3,null,2);
+Insert into Intake_form Values(3, '11-20-2023','09-03-2023','Y','N','N','Y','Disability','Not enough government assistance','N','2023','N','Y','N','N','N','N',2,1,3,null,2);
+Insert into Intake_form Values(4, '9-17-2023','08-03-2023','N','Y','N','N', 'Unemployeement','Recession', 'Y','2021','Y','Y','N','N','Y','Y',3,2,3,null,3);
+Insert into Intake_form Values(5, '12-07-2023','08-03-2023','N','Y','N','N', 'Unemployeement','Recession', 'Y','2021','Y','Y','N','N','Y','Y',3,2,3,null,3);
+
+Insert into Dependent_Intake values(6,4);
+Insert into Dependent_Intake values(6,5);
+
+Insert into Contact_Intake values(5,1);
+
+Insert into PreIntake values (1,1,1,'12-06-2023');
+Insert into PreIntake values(2,2,2,'10-15-2023');
+Insert into PreIntake values(3,2,2,'11-20-2023');
+Insert into PreIntake values(4,3,3,'9-17-2023');
+Insert into PreIntake values(5,3,3,'12-07-2023');
+
+Insert into Referral values(1, 'Martha',Null,'Cuban');
+Insert into Referral values(2,'Bob',Null,'Wills');
+
+Insert into Referral_Applicant values(3,1);
+Insert into Referral_Applicant values(2,1);
+Insert into Referral_Applicant values(1,2);
+Insert into Referral_Applicant values(2,2);
+
+Select First_Name, Last_Name, Income_Desc,Income_Bracket
+from Person p,Applicant a,Income_Amount IA,Income_source 
+where p.person_Id = a.person_ID
+and a.BracketID = IA.BracketID
+and Income_source.
